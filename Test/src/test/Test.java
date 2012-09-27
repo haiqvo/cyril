@@ -5,7 +5,7 @@
 package test;
 
 /**
- Hello
+ 
  * @author Hai Vo
  */
 public class Test {
