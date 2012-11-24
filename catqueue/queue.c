@@ -59,12 +59,10 @@ void insert_queue (queue_ref queue, queue_item_t item) {
 queue_item_t remove_queue (queue_ref queue) {
    assert (is_queue (queue));
    assert (! isempty_queue (queue));
-   queuenode_ref new = malloc (sizeof (struct queue));
-   new->tag = queuenode_tag;
-   new = queue->front;
-   queue_item_t temp = new->item;
-   queue->front = new->link;
-   free(new);
+   queuenode_ref old = queue->front;
+   queue_item_t temp = old->item;
+   queue->front = queue->front->link;
+   free(old);
    return temp;
 }
 
