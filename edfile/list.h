@@ -91,12 +91,19 @@ void insert_list (list_ref, char *);
    //                 not the client.
    //
 
+void print_list(list_ref list);
+
+void insertAfter(list_ref list, char *line);
+
+void insertBefore(list_ref list, char *line);
+
 void delete_list (list_ref);
    //
    // Mutator:        deletes the current line from the list.
    // Precondition:   valid list and not empty.
    // Postcondition:  same list with one line removed.
    //
+void writeFile(list_ref list, FILE *filename);
 
 bool empty_list (list_ref);
    //
@@ -111,6 +118,7 @@ bool is_list (list_ref);
    // Precondition:   none.
    // Postcondition:  returns TRUE if is not null and is a list.
    //
+int counter (list_ref list);
 
 #endif
 
