@@ -67,6 +67,12 @@ list_ref new_list (void) {
 
 void free_list (list_ref list) {
    assert (is_list (list));
+   while(list->head != NULL){
+       list->curr = list->head;
+       free(list->curr->line);
+       free(list->curr);
+       list->head = list->head->next;
+   }
    assert (empty_list (list));
    memset (list, 0, sizeof (struct list));
    free (list);
@@ -77,7 +83,7 @@ bool setmove_list (list_ref list, list_move move) {
    switch (move) {
       case MOVE_HEAD:
            list->curr = list->head;
-           printf("%6d: %s\n",counter(list), list->curr->line);
+           printf("%6d: %s\n",counter(list, curr), list->curr->line);
            break;
       case MOVE_PREV:
            if(list->curr->prev == NULL){
@@ -85,7 +91,7 @@ bool setmove_list (list_ref list, list_move move) {
            }else{
                list->curr = list->curr->prev;
            }
-           printf("%6d: %s\n",counter(list), list->curr->line);
+           printf("%6d: %s\n",counter(list, curr), list->curr->line);
            break;
       case MOVE_NEXT:
            if(list->curr->next == NULL){
@@ -93,24 +99,35 @@ bool setmove_list (list_ref list, list_move move) {
            }else{
                list->curr = list->curr->next;
            }
-           printf("%6d: %s\n",counter(list), list->curr->line);
+           printf("%6d: %s\n",counter(list, curr), list->curr->line);
            break;
       case MOVE_LAST:
            list->curr = list->last;
-           printf("%6d: %s\n",counter(list), list->curr->line);
+           printf("%6d: %s\n",counter(list, curr), list->curr->line);
            break;
       default: assert (false);
    }
    return false;
 }
 
-int counter (list_ref list){
+int counter (list_ref list, list_type type){
     assert(is_list (list));
     int count = 0;
     listnode_ref temp = list->head;
-    while(temp != list->curr){
-        count++;
-        temp = temp->next;
+    switch(type){
+        case curr:
+            while(temp != list->curr){
+                count++;
+                temp = temp->next;
+            } 
+            break;
+        case last:
+            while(temp != NULL){
+                count++;
+                temp = temp->next;
+            }
+            break;
+        default: break;
     }
     return count;
 }
@@ -141,7 +158,7 @@ void insert_list (list_ref list, char *line) {
    list->curr = list->last;
 }
 
-void insertAfter(list_ref list, char *line){
+void insertAfter(list_ref list, char *line, list_type type){
     assert(is_list(list));
     listnode_ref new = malloc(sizeof (struct list));
     new->tag = listnode_tag;
@@ -158,7 +175,8 @@ void insertAfter(list_ref list, char *line){
         list->curr->next = new;
     }
     list->curr = list->curr->next;
-    printf("%6d: %s\n",counter(list), list->curr->line);
+    if(type == curr)
+    printf("%6d: %s\n",counter(list, curr), list->curr->line);
 }
 
 void insertBefore(list_ref list, char *line){
@@ -178,7 +196,7 @@ void insertBefore(list_ref list, char *line){
         list->curr->prev = new;
     }
     list->curr = list->curr->prev;
-    printf("%6d: %s\n",counter(list), list->curr->line);
+    printf("%6d: %s\n",counter(list, curr), list->curr->line);
 }
 
 void print_list(list_ref list){
@@ -204,13 +222,15 @@ void delete_list (list_ref list) {
    }else{
        list->curr->next->prev = list->curr->prev;
    }
+   free (list->curr->line);  
+   free (list->curr);
    if(list->curr->next != NULL){
        list->curr = list->curr->next;
-       printf("%6d: %s\n",counter(list), list->curr->line);
+       printf("%6d: %s\n",counter(list, curr), list->curr->line);
    }
    else if(list->curr->prev != NULL){ 
        list->curr = list->curr->prev;
-       printf("%6d: %s\n",counter(list), list->curr->line);
+       printf("%6d: %s\n",counter(list, curr), list->curr->line);
    }else{
        printf("the list is blank.\n");
    }

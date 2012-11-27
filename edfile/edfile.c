@@ -1,6 +1,7 @@
 // $Id: edfile.c,v 1.14 2012-11-14 21:35:53-08 - - $
 
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <libgen.h>
 #include <stdio.h>
@@ -22,7 +23,8 @@ void badline (int stdincount, char *stdinline) {
 void putFileinList(list_ref list, FILE *input, 
    char *filename, int after){
    char buffer[1024];
-   for (int linenr = 1; ; ++linenr) {
+   int linenr = 1;
+   for (; ; ++linenr) {
       char *linepos = fgets (buffer, sizeof buffer, input);
       if (linepos == NULL) break;
       linepos = strchr (buffer, '\n');
@@ -40,8 +42,15 @@ void putFileinList(list_ref list, FILE *input,
       if(after == 1){
         insert_list (list, linepos);
       }else{
-        insertAfter(list, linepos);
+        insertAfter(list, linepos, last);
       }
+   }
+   if(after == 1){
+          printf("%s: %d lines read from %s.\n", 
+                  Exec_Name, counter(list, last), filename);
+   }else{
+       printf("%s: %d lines read from %s.\n", 
+                  Exec_Name, linenr-1, filename);
    }
 }
 
@@ -68,6 +77,7 @@ void putfilelist (list_ref list, char *filename, int after) {
    }
 }
 
+
 void editfile (list_ref list) {
    char stdinline[1024];
    int stdincount = 0;
@@ -75,6 +85,9 @@ void editfile (list_ref list) {
    for(;; ++stdincount) {
       printf ("%s: ", Exec_Name);
       char *linepos = fgets (stdinline, sizeof stdinline, stdin);
+      if(isspace(stdinline[0]) != 0){
+          continue;
+      }
       if (linepos == NULL) break;
       if (want_echo) printf ("%s", stdinline);
       linepos = strchr (stdinline, '\n');
@@ -86,22 +99,23 @@ void editfile (list_ref list) {
          switch (stdinline[0]) {
             case '$': setmove_list (list, MOVE_LAST); break;
             case '*': print_list(list); break;
-            case '.': printf("%6d: %s\n",counter(list), 
+            case '.': printf("%6d: %s\n",counter(list, curr), 
                     viewcurr_list (list)); break;
             case '0': setmove_list (list, MOVE_HEAD); break;
             case '<': setmove_list (list, MOVE_PREV); break;
             case '>': setmove_list (list, MOVE_NEXT); break;
             case '@': debugdump_list (list); break;
-            case 'a': insertAfter(list, sentence); break;
+            case 'a': insertAfter(list, sentence, curr); break;
             case 'd': delete_list (list); break;
             case 'i': insertBefore(list, sentence); break;
             case 'r': putfilelist (list, sentence, 0); break;
             case 'w': putfilelist (list, sentence, 2); break;
+            case '#': break;
             default : badline (stdincount, stdinline);
          }
-      }  
+      }
    }
-   free(sentence);
+   printf (" ^D\n");
 }
 
 void usage_exit() {

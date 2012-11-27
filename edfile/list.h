@@ -32,6 +32,7 @@ typedef enum {MOVE_HEAD, MOVE_PREV, MOVE_NEXT, MOVE_LAST} list_move;
    // MOVE_NEXT - set the cursor position to the node immediately
    //             after the current position.
    //
+typedef enum {curr, last} list_type;
 
 typedef struct list *list_ref;
    //
@@ -93,7 +94,7 @@ void insert_list (list_ref, char *);
 
 void print_list(list_ref list);
 
-void insertAfter(list_ref list, char *line);
+void insertAfter(list_ref list, char *line, list_type);
 
 void insertBefore(list_ref list, char *line);
 
@@ -118,7 +119,7 @@ bool is_list (list_ref);
    // Precondition:   none.
    // Postcondition:  returns TRUE if is not null and is a list.
    //
-int counter (list_ref list);
+int counter (list_ref list, list_type);
 
 #endif
 
