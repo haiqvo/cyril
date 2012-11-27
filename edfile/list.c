@@ -162,7 +162,7 @@ void insertAfter(list_ref list, char *line, list_type type){
     assert(is_list(list));
     listnode_ref new = malloc(sizeof (struct list));
     new->tag = listnode_tag;
-    new->line = line;
+    new->line = strdup(line);
     if(list->curr->next == NULL){
         new->next = NULL;
         list->curr->next = new;
@@ -183,7 +183,7 @@ void insertBefore(list_ref list, char *line){
     assert(is_list(list));
     listnode_ref new = malloc(sizeof (struct list));
     new->tag = listnode_tag;
-    new->line = line;
+    new->line = strdup(line);
     if(list->curr->prev == NULL){
         new->prev = NULL;
         list->curr->prev = new;

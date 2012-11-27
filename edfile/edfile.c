@@ -81,7 +81,6 @@ void putfilelist (list_ref list, char *filename, int after) {
 void editfile (list_ref list) {
    char stdinline[1024];
    int stdincount = 0;
-   char *sentence;
    for(;; ++stdincount) {
       printf ("%s: ", Exec_Name);
       char *linepos = fgets (stdinline, sizeof stdinline, stdin);
@@ -95,7 +94,6 @@ void editfile (list_ref list) {
          badline (stdincount, stdinline);
       }else {
          *linepos = '\0';
-         sentence = strdup(stdinline+1);
          switch (stdinline[0]) {
             case '$': setmove_list (list, MOVE_LAST); break;
             case '*': print_list(list); break;
@@ -105,11 +103,11 @@ void editfile (list_ref list) {
             case '<': setmove_list (list, MOVE_PREV); break;
             case '>': setmove_list (list, MOVE_NEXT); break;
             case '@': debugdump_list (list); break;
-            case 'a': insertAfter(list, sentence, curr); break;
+            case 'a': insertAfter(list, stdinline+1, curr); break;
             case 'd': delete_list (list); break;
-            case 'i': insertBefore(list, sentence); break;
-            case 'r': putfilelist (list, sentence, 0); break;
-            case 'w': putfilelist (list, sentence, 2); break;
+            case 'i': insertBefore(list, stdinline+1); break;
+            case 'r': putfilelist (list, stdinline+1, 0); break;
+            case 'w': putfilelist (list, stdinline+1, 2); break;
             case '#': break;
             default : badline (stdincount, stdinline);
          }
@@ -130,10 +128,12 @@ int main (int argc, char **argv) {
    if (argc != 2) usage_exit();
    want_echo = ! (isatty (fileno (stdin)) && isatty (fileno (stdout)));
    list_ref list = new_list();
-   for (int argi = 1; argi < argc; ++argi) {
-        putfilelist (list, argv[argi], 1);
+   if(argc ==2){
+        for (int argi = 1; argi < argc; ++argi) {
+                putfilelist (list, argv[argi], 1);
+        }
+        editfile (list);
+        free_list (list); list = NULL;
    }
-   editfile (list);
-   free_list (list); list = NULL;
    return Exit_Status;
 }
