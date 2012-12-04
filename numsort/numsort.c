@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     }
     inssort(array, count, sizeof(double), compare);
     for(int j=0; j<count; j++){
-        printf("%f\n", array[j]);
+        printf("%20.15g\n", array[j]);
     }
     return (Exit_Status);
 }
