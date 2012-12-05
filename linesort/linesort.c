@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     Exec_Name = basename(argv[0]);
     int count = 0;
     char *buffer[1000];
+    char *temp;
     size_t length;
     if(argc != 1){
         fprintf (stderr, "%s has no condition.\n",
@@ -54,13 +55,15 @@ int main(int argc, char** argv) {
             break;
         }
          * */
-        buffer[i]=strdup(input);   
+        temp = strdup(input);
+        buffer[i]=temp;   
         count++;
         length = count;
     }
     inssort(buffer, count, sizeof(char*), compare);
     for(int j=0; j<count; j++){
         printf("%s\n", buffer[j]);
+        free(buffer[j]);
     }
     return (Exit_Status);
 }
