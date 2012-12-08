@@ -42,27 +42,24 @@ void free_hashset (hashset_ref hashset) {
 }
 
 void put_hashset (hashset_ref hashset, char *item) {
-   char *word  = strdup(item);
-   size_t starting_index = strhash(word) % hashset->length;
-   if(has_hashset(hashset, word)){
+   char *word = strdup(item);
+   size_t starting_index = strhash(item) % hashset->length;
+   if(has_hashset(hashset, item)){
        times++;
        return;
    }else{
        while(hashset->array[starting_index]!= NULL){
            starting_index = (starting_index+1) % hashset->length;
        }
-       hashset->array[starting_index] = item;
+       hashset->array[starting_index] = word;
        hashset->load++;
        if(hashset->load*4>(int)hashset->length){
-           char **newarray;
-           char *word;
-           size_t starting_index;
-           newarray = malloc((hashset->length*2+1) * sizeof (char*));
+           char **newarray = malloc((hashset->length*2+1) * sizeof (char*));
            for (size_t index = 0; index < hashset->length; ++index){
                if(hashset->array[index] != NULL){
-                   word  = hashset->array[index];
-                   starting_index = strhash(word) % (hashset->length*2+1);
-                      newarray[starting_index] = word;
+                   size_t starting_index = strhash(hashset->array[index]) 
+                           % (hashset->length*2+1);
+                   newarray[starting_index] = hashset->array[index];
                }
            }
            hashset->length = hashset->length*2+1;
@@ -113,10 +110,9 @@ void debug(hashset_ref hashset, int xopt_coounter){
 }
 
 bool has_hashset (hashset_ref hashset, char *item) {
-    char *word = strdup(item);
-    size_t index = strhash(word) % hashset->length;
+    size_t index = strhash(item) % hashset->length;
     while(hashset->array[index] != NULL){
-        if(strcmp(hashset->array[index], word)){
+        if(strcmp(hashset->array[index], item)==0){
             return true;
         }
         index = (index+1) % hashset->length;

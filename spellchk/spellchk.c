@@ -65,7 +65,9 @@ void load_dictionary (char *dictionary_name, hashset_ref hashset) {
          if (nlpos != NULL) {
             *nlpos = '\0';
          }
-         put_hashset(hashset, input);
+         //if(!has_hashset(hashset, input)){
+             put_hashset(hashset, input);
+         //}
       }
       fclose(dictionary);
    
