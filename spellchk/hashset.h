@@ -17,7 +17,6 @@ hashset_ref new_hashset (void);
 //
 void free_hashset (hashset_ref);
 
-void storingHash(hashset_ref hashset, char *item);
 
 //
 // Inserts a new string into the hashset.

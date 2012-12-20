@@ -10,7 +10,6 @@
 #include "strhash.h"
 
 #define HASH_NEW_SIZE 15
-int times = 0;
 
 struct hashset {
    size_t length;
@@ -35,6 +34,9 @@ hashset_ref new_hashset (void) {
 
 void free_hashset (hashset_ref hashset) {
    DEBUGF ('h', "free (%p), free (%p)\n", hashset->array, hashset);
+   for(size_t index = 0; index<hashset->length; index++){
+       free(hashset->array[index]);
+   }
    memset (hashset->array, 0, hashset->length * sizeof (char*));
    free (hashset->array);
    memset (hashset, 0, sizeof (struct hashset));
@@ -42,36 +44,34 @@ void free_hashset (hashset_ref hashset) {
 }
 
 void put_hashset (hashset_ref hashset, char *item) {
-   char *word = strdup(item);
-   size_t starting_index = strhash(item) % hashset->length;
    if(has_hashset(hashset, item)){
-       times++;
        return;
    }else{
-       while(hashset->array[starting_index]!= NULL){
-           starting_index = (starting_index+1) % hashset->length;
+       char *word = strdup(item);
+       size_t index = strhash(item) % hashset->length;
+       while(hashset->array[index] != NULL){
+           index = (index+1) % hashset->length;
        }
-       hashset->array[starting_index] = word;
+       hashset->array[index] = word;
        hashset->load++;
        if(hashset->load*4>(int)hashset->length){
-           char **newarray = malloc((hashset->length*2+1) * sizeof (char*));
+           char **newarray = malloc((hashset->length*2+1)
+                             * sizeof (char*));
            for (size_t index = 0; index < hashset->length; ++index){
                if(hashset->array[index] != NULL){
-                   size_t starting_index = strhash(hashset->array[index]) 
-                           % (hashset->length*2+1);
+                   char *temp = hashset->array[index];
+                   size_t starting_index = strhash(temp)%
+                           (hashset->length*2+1);
                    newarray[starting_index] = hashset->array[index];
                }
            }
-           hashset->length = hashset->length*2+1;
+           hashset->length = (2*hashset->length)+1;
            free(hashset->array);
            hashset->array = newarray;
        }
+       
    }
-       //printf("hashset=%p, load=%d, length=%d, index=%d, item=%s  \n", hashset,
-       //hashset->load, (int)hashset->length, 
-       //(int)starting_index, hashset->array[starting_index]);
    
-   //STUBPRINTF ("hashset=%p, item=%s\n", hashset, item);
 }
 
 void debug(hashset_ref hashset, int xopt_coounter){
@@ -92,7 +92,6 @@ void debug(hashset_ref hashset, int xopt_coounter){
         }
         count = 0;
     }
-    printf("time: %d\n", times);
     for(int k = 0; k<hashset->load; k++){
         if(clusters[k] != 0){
             printf("%d clusters of size %d\n", 
@@ -103,7 +102,8 @@ void debug(hashset_ref hashset, int xopt_coounter){
         for(size_t l=0; l<hashset->length; l++){
            if(hashset->array[l] != NULL){
               printf("array[%10d] = %12u \"%s\"\n", 
-                   (int)l, strhash(hashset->array[l]), hashset->array[l]);
+                   (int)l, strhash(hashset->array[l]),
+                      hashset->array[l]);
            }
         }
     }
@@ -111,13 +111,16 @@ void debug(hashset_ref hashset, int xopt_coounter){
 
 bool has_hashset (hashset_ref hashset, char *item) {
     size_t index = strhash(item) % hashset->length;
-    while(hashset->array[index] != NULL){
-        if(strcmp(hashset->array[index], item)==0){
+    for(;;){
+        if(hashset->array[index] == NULL){
+            return false;
+        }
+        if(strcmp(hashset->array[index], item) == 0){
             return true;
+            
         }
         index = (index+1) % hashset->length;
-    }   
-   //STUBPRINTF ("hashset=%p, item=%s\n", hashset, item);
+    }
    return false;
 }
 

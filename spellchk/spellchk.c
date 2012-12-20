@@ -13,10 +13,12 @@
 #include "yyextern.h"
 
 #define STDIN_NAME       "-"
-#define DEFAULT_DICTNAME "/afs/cats.ucsc.edu/courses/cmps012b-wm/usr/dict/words"
+#define DEFAULT "/afs/cats.ucsc.edu/courses/cmps012b-wm/usr/dict/words"
 #define DEFAULT_DICT_POS 0
 #define EXTRA_DICT_POS   1
 #define NUMBER_DICTS     2
+
+int MISSPELLED = 2;
 
 void print_error (char *object, char *message) {
    fflush (NULL);
@@ -41,33 +43,36 @@ void spellcheck (char *filename, hashset_ref hashset) {
       if (token == 0) break;
       DEBUGF ('m', "line %d, yytext = \"%s\"\n", yylineno, yytext);
       //STUBPRINTF ("%s: %d: %s\n", filename, yylineno, yytext);
-      if(has_hashset(hashset, yytext)){
-          printf("working: %s\n", yytext);
-      }else{
-          //printf("working: %s\n", tolower(yytext));
-          //char *temp = putchar(tolower(yytext));
-          //if(has_hashset(hashset, temp)){
-          //    printf("working: %s\n", yytext);
-          //}
-          printf("can't find: %s\n", yytext);
+      char *nlpos = strchr(yytext, '\n');
+      if (nlpos != NULL) {
+          *nlpos = '\0';
+      }
+      if(!has_hashset(hashset, yytext)){
+          int i = 0;
+          for(i = 0; yytext[i]; i++){
+             yytext[i] = tolower(yytext[i]);
+          }
+          if(!has_hashset(hashset, yytext)){
+             printf("can't find: %s\n", yytext);
+             Exit_Status = MISSPELLED;
+          }
       }
    }
 }
 
 void load_dictionary (char *dictionary_name, hashset_ref hashset) {
    if (dictionary_name == NULL) return;
-   char input[100];
+   char buffer[1024];
+   //char *input;
    DEBUGF ('m', "dictionary_name = \"%s\", hashset = %p\n",
            dictionary_name, hashset);
    FILE *dictionary = open_infile(dictionary_name);
-      while(fgets(input, sizeof(input) , dictionary)){
-         char *nlpos = strchr(input, '\n');
+      while(fgets(buffer, sizeof(buffer), dictionary)){
+         char *nlpos = strchr(buffer, '\n');
          if (nlpos != NULL) {
             *nlpos = '\0';
          }
-         //if(!has_hashset(hashset, input)){
-             put_hashset(hashset, input);
-         //}
+            put_hashset(hashset, buffer);
       }
       fclose(dictionary);
    
@@ -77,7 +82,7 @@ void load_dictionary (char *dictionary_name, hashset_ref hashset) {
 
 int main (int argc, char **argv) {
    Exec_Name = basename (argv[0]);
-   char *default_dictionary = DEFAULT_DICTNAME;
+   char *default_dictionary = DEFAULT;
    char *user_dictionary = NULL;
    hashset_ref hashset = new_hashset ();
    yy_flex_debug = false;
@@ -135,7 +140,7 @@ int main (int argc, char **argv) {
       }
    }
    }
-   
+   free_hashset(hashset);
    yycleanup ();
    return Exit_Status;
 }
