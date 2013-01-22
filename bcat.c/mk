@@ -1,0 +1,4 @@
+#!/bin/sh -x
+# $Id: mk,v 1.4 2012-10-23 12:35:42-07 - - $
+cid + bcat.c
+gcc -g -O0 -Wall -Wextra -std=gnu99 bcat.c -o bcat
