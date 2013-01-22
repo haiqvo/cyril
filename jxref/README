@@ -1,0 +1,6 @@
+$Id: README,v 1.1 2012-10-31 13:12:50-07 - - $
+Hai Vo hqvo@ucsc.edu 
+jxref takes inputs and puts in the a tree the tree is
+organized in from right to left. I believe that I did this 
+code right and if it is missing anything it is probably 
+because I forgot or miss read the assignment.
